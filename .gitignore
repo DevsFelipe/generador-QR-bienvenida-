@@ -1,0 +1,30 @@
+# Configuración privada; los ejemplos sin claves sí se publican
+.env
+.env.*
+!.env.example
+!.env.*.example
+**/acceso-*.txt
+**/credentials*.json
+**/secrets*.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Paquetes generados y repositorio de despliegue independiente
+/outputs/
+node_modules/
+.npm-cache/
+.private-backups/
+data/
+*.log
+
+# Planillas y exportaciones con datos de invitados
+*.xlsx
+*.xls
+*.csv
+*.tsv
+*.dump
+*.bak
+.DS_Store
+Thumbs.db

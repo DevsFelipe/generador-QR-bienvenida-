@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: encuentro-recepcion-qr
+    runtime: docker
+    plan: free
+    dockerfilePath: ./reception/Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: RECEPTION_HOST
+        value: 0.0.0.0
+      - key: RECEPTION_TRUST_PROXY
+        value: "true"
+      - key: RECEPTION_MONGODB_DB
+        value: invitaciones
+      - key: RECEPTION_MONGODB_URI
+        sync: false

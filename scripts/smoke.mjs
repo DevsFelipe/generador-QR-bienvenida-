@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import ExcelJS from 'exceljs';
+const base='http://127.0.0.1:3210';
+const status=await (await fetch(base+'/api/status')).json();
+assert.equal(typeof status.csrf,'string');
+let response=await fetch(base+'/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+assert.equal(response.status,403);
+const workbook=new ExcelJS.Workbook();workbook.addWorksheet('Nómina').addRows([['nombre','correo','institución'],['Ana','ana@example.cl','UC'],['Luis','invalido','Instituto']]);
+const form=new FormData();form.append('file',new Blob([await workbook.xlsx.writeBuffer()]),'prueba.xlsx');
+response=await fetch(base+'/api/excel',{method:'POST',headers:{'X-CSRF-Token':status.csrf},body:form});assert.equal(response.status,200);
+const preview=await response.json();
+response=await fetch(base+'/api/import/preview',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':status.csrf},body:JSON.stringify({previewId:preview.previewId,sheet:0,header:0,mapping:{nombre:0,correo:1,institucion:2}})});
+assert.equal(response.status,200);const rows=await response.json();assert.equal(rows.length,2);assert.equal(rows[0].errors.length,0);assert.equal(rows[1].errors.length,1);
+response=await fetch(base+'/api/events',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':status.csrf,Origin:'https://externo.example'},body:'{}'});assert.equal(response.status,403);
+console.log('HTTP: estado, protección de operaciones, carga XLSX y vista previa: correctos. No se utilizaron datos reales ni SMTP.');

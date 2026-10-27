@@ -1,0 +1,8 @@
+**
+!package.json
+!package-lock.json
+!reception/
+!reception/*.js
+!reception/public/
+!reception/public/**
+!reception/Dockerfile
