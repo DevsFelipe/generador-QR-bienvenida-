@@ -4,7 +4,7 @@ import {mayAccess} from './auth.js';
 export class ReceptionError extends Error{constructor(code,status=400){super(code);this.code=code;this.status=status;}}
 export function objectId(value){if(typeof value!=='string'||!/^[a-f0-9]{24}$/i.test(value))throw new ReceptionError('INVALID_ID');return new ObjectId(value);}
 export function tokenHash(payload){if(typeof payload!=='string'||!/^GALAQR1:[A-Za-z0-9_-]{43}$/.test(payload.trim()))throw new ReceptionError('INVALID_QR');return createHash('sha256').update(payload.trim().slice(8)).digest('hex');}
-export const guestView=guest=>({_id:guest._id,nombre:guest.nombre,rut:guest.rut,institucion:guest.institucion,mesa:guest.mesa,menu:guest.menu,checkIn:guest.checkIn});
+export const guestView=guest=>({_id:guest._id,nombre:guest.nombre,rut:guest.rut,institucion:guest.institucion,mesa:guest.mesa,menu:guest.menu,grupoFamiliar:guest.grupoFamiliar,numeroNinos:guest.numeroNinos,nombreColaborador:guest.nombreColaborador,checkIn:guest.checkIn});
 // Debe ejecutarse en transacción. La escritura del evento serializa el cierre con los ingresos.
 export async function registerInTransaction(db,user,eventId,input,session){
  if(!mayAccess(user,eventId))throw new ReceptionError('FORBIDDEN',403);

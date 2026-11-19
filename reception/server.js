@@ -77,7 +77,7 @@ app.get('/api/events/:event/guests',async(req,res)=>{
  const eventId=await eventAccess(req),q=typeof req.query.q==='string'?req.query.q.trim():'';
  if(q.length<2||q.length>100)throw new ReceptionError('SEARCH_REQUIRED');
  const regex=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i');
- const guests=await(await store()).db.collection('guests').find({eventId,activo:true,$or:[{nombre:regex},{institucion:regex},{rut:regex}]}).project({_id:1,nombre:1,rut:1,institucion:1,mesa:1,menu:1,checkIn:1}).limit(30).toArray();
+ const guests=await(await store()).db.collection('guests').find({eventId,activo:true,$or:[{nombre:regex},{institucion:regex},{rut:regex}]}).project({_id:1,nombre:1,rut:1,institucion:1,mesa:1,menu:1,grupoFamiliar:1,numeroNinos:1,nombreColaborador:1,checkIn:1}).limit(30).toArray();
  res.json(guests.map(guestView));
 });
 app.post('/api/events/:event/check-ins',async(req,res)=>{

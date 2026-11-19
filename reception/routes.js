@@ -33,7 +33,7 @@ adminRoutes.use((req,res,next)=>{if(req.user.role!=='admin')throw new ReceptionE
 adminRoutes.post('/events',async(req,res)=>{const data={...eventFields(req.body),estado:'borrador',createdAt:new Date()};const result=await(await store()).db.collection('events').insertOne(data);res.json({...data,_id:result.insertedId});});
 adminRoutes.put('/events/:event',async(req,res)=>{const result=await(await store()).db.collection('events').updateOne({_id:objectId(req.params.event)},{$set:eventFields(req.body)});if(!result.matchedCount)throw new ReceptionError('NOT_FOUND',404);res.json({ok:true});});
 adminRoutes.get('/events/:event/guests',async(req,res)=>{
- const eventId=objectId(req.params.event);res.json(await(await store()).db.collection('guests').find({eventId}).project({nombre:1,rut:1,correo:1,institucion:1,mesa:1,menu:1,activo:1,checkIn:1}).sort({nombre:1}).limit(5000).toArray());
+ const eventId=objectId(req.params.event);res.json(await(await store()).db.collection('guests').find({eventId}).project({nombre:1,rut:1,correo:1,institucion:1,mesa:1,menu:1,grupoFamiliar:1,numeroNinos:1,nombreColaborador:1,activo:1,checkIn:1}).sort({nombre:1}).limit(5000).toArray());
 });
 adminRoutes.post('/events/:event/guests',async(req,res)=>{
  try{guestInput(req.body);}catch(e){return res.status(400).json({code:'VALIDATION',message:e.message});}
@@ -52,7 +52,7 @@ adminRoutes.put('/events/:event/guests/:guest',async(req,res)=>{
  try{const result=await saveGuest((await store()).db.collection('guests'),objectId(req.params.event),data,{update:true,guestId:objectId(req.params.guest)});res.json({result});}catch(e){if(e.code===11000)throw new ReceptionError('DUPLICATE_GUEST',409);throw e;}
 });
 adminRoutes.get('/template',async(req,res)=>{
- const book=new ExcelJS.Workbook(),sheet=book.addWorksheet('Invitados');sheet.addRow(['nombre','rut','correo','institucion','mesa','menu']);sheet.addRow(['Persona de ejemplo','12.345.678-5','','Institución','12','Vegetariano']);sheet.columns.forEach(c=>c.width=25);
+ const book=new ExcelJS.Workbook(),sheet=book.addWorksheet('Invitados');sheet.addRow(['nombre','rut','correo','institucion','mesa','menu','Grupo Familiar','N° Niños','nombre colaborador']);sheet.addRow(['Persona de ejemplo','12.345.678-5','','DICTUC','12','Vegetariano','Familia de ejemplo',0,'Persona de ejemplo']);sheet.columns.forEach(c=>c.width=25);
  res.attachment('plantilla-invitados.xlsx').send(Buffer.from(await book.xlsx.writeBuffer()));
 });
 adminRoutes.post('/excel',upload.single('file'),async(req,res)=>{
