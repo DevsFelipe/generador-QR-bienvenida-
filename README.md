@@ -20,9 +20,9 @@ El repositorio de despliegue contiene únicamente el paquete generado.
 
 La plantilla incluye **Grupo Familiar**, **N° Niños** y **nombre colaborador**. Son columnas opcionales y se pueden asociar manualmente durante la carga. N° Niños acepta enteros no negativos; cero se conserva y un campo vacío significa sin informar. El alta manual, la edición y el listado administrativo incluyen los mismos datos. Las columnas de nombre, RUT, mesa y menú siguen siendo obligatorias.
 
-En la administración, **Preparar nuevo paseo familiar** completa un formulario nuevo con nombre Paseo familiar DICTUC 2026, fecha sábado 28/11/2026 y lugar Centro de Eventos Los Aromos. Guardarlo crea un evento distinto; no reemplaza eventos anteriores. El sitio del recinto es https://eventoslosaromos.cl/.
+En la administración, **Preparar nuevo paseo familiar** completa un formulario nuevo con nombre Paseo Final de Año - Dictuc 2026, fecha sábado 28/11/2026 y lugar Centro de Eventos Los Aromos. Guardarlo crea un evento distinto; no reemplaza eventos anteriores. El sitio del recinto es https://eventoslosaromos.cl/.
 
-La página de invitados identifica únicamente a DICTUC y toma nombre, fecha y lugar del evento guardado, sin hora pública ni datos fijos de San Agustín. Los metadatos familiares se muestran a los encargados autorizados; no se agregan a la respuesta pública del RUT. Reimportar una planilla sin asociar las columnas familiares conserva esos valores existentes y la asistencia.
+La página de invitados identifica únicamente a DICTUC y toma nombre, fecha y lugar del evento guardado, sin hora pública ni datos fijos de San Agustín. Después de confirmar asistencia se muestran grupo familiar y número de niños, además de mesa y menú. Cero niños se muestra como 0; los campos vacíos como «Sin informar». El nombre del colaborador permanece administrativo y no se publica en esa respuesta. Reimportar una planilla sin asociar las columnas familiares conserva esos valores existentes y la asistencia.
 
 ## 1. Instalar y configurar después de clonar
 

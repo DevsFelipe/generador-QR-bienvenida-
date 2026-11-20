@@ -2,7 +2,7 @@
 
 Nuevo evento preparado para el sábado 28 de noviembre de 2026 en Centro de Eventos Los Aromos. Usar **Preparar nuevo paseo familiar**, revisar y guardar el formulario. No se crea ni modifica un evento en MongoDB por desplegar esta versión.
 
-La plantilla y el mapeo Excel incorporan Grupo Familiar (`grupoFamiliar`), N° Niños (`numeroNinos`) y nombre colaborador (`nombreColaborador`). Son opcionales para compatibilidad. Cantidad de niños: entero >= 0 o vacío; grupo y colaborador: texto de hasta 200 caracteres. El listado, alta manual y edición incluyen estos campos; cero se conserva al editar. Importar sin mapearlos no borra valores ya guardados. La búsqueda del recepcionista también recibe los metadatos; la consulta pública sigue limitada a nombre, mesa, menú y fecha de ingreso.
+La plantilla y el mapeo Excel incorporan Grupo Familiar (`grupoFamiliar`), N° Niños (`numeroNinos`) y nombre colaborador (`nombreColaborador`). Son opcionales para compatibilidad. Cantidad de niños: entero >= 0 o vacío; grupo y colaborador: texto de hasta 200 caracteres. El listado, alta manual y edición incluyen estos campos; cero se conserva al editar. Importar sin mapearlos no borra valores ya guardados. La búsqueda del recepcionista también recibe los metadatos; la consulta pública incluye nombre, mesa, menú, grupo familiar, número de niños y fecha de ingreso; no incluye RUT, correo ni nombre del colaborador.
 
 Verificación: pruebas unitarias de familia, importación, validación y reimportación con asistencia conservada; vista previa con datos ficticios sin acceso a la base real. No se ejecutó carga ni alteración de los datos del evento anterior.
 

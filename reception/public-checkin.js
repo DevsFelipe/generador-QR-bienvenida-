@@ -13,5 +13,5 @@ export async function registerRut(db,event,input,session){
  if(!guest.mesa||!guest.menu)throw new ReceptionError('ASSIGNMENT_PENDING',409);
  const updated=await db.collection('guests').findOneAndUpdate({...filter,checkIn:null},{$set:{checkIn:{at:new Date(),method:'rut',operationId:input.operationId,by:null,operator:'Autoregistro del invitado'}}},{session,returnDocument:'after'});
  guest=updated||await db.collection('guests').findOne(filter,{session});
- return{code:updated?'CHECKED_IN':'ALREADY_CHECKED_IN',guest:{nombre:guest.nombre,mesa:guest.mesa,menu:guest.menu,at:guest.checkIn?.at}};
+ return{code:updated?'CHECKED_IN':'ALREADY_CHECKED_IN',guest:{nombre:guest.nombre,mesa:guest.mesa,menu:guest.menu,grupoFamiliar:guest.grupoFamiliar??null,numeroNinos:guest.numeroNinos??null,at:guest.checkIn?.at}};
 }

@@ -21,7 +21,7 @@ test('autoregistro público mantiene primera hora, limita datos y rechaza asigna
  const event={_id:new ObjectId(),publicSlug:'a'.repeat(32)},guest={nombre:'Ana ficticia',mesa:'12',menu:'Vegano',correo:'privado@example.cl',rut:'12345678-5',checkIn:null};
  let opened=true;
  const db={collection(name){return name==='events'?{async findOne(){return opened?event:null;}}:{async findOne(filter){return filter.rut===guest.rut?guest:null;},async findOneAndUpdate(){if(guest.checkIn)return null;guest.checkIn={at:new Date()};return guest;}};}};
- let result=await registerRut(db,event,{rut:'12.345.678-5',operationId:randomUUID()});assert.equal(result.code,'CHECKED_IN');assert.deepEqual(Object.keys(result.guest).sort(),['at','menu','mesa','nombre']);const at=guest.checkIn.at;
+ let result=await registerRut(db,event,{rut:'12.345.678-5',operationId:randomUUID()});assert.equal(result.code,'CHECKED_IN');assert.deepEqual(Object.keys(result.guest).sort(),['at','grupoFamiliar','menu','mesa','nombre','numeroNinos']);const at=guest.checkIn.at;
  result=await registerRut(db,event,{rut:'123456785',operationId:randomUUID()});assert.equal(result.code,'ALREADY_CHECKED_IN');assert.equal(result.guest.at,at);
  guest.menu='';await assert.rejects(registerRut(db,event,{rut:'123456785',operationId:randomUUID()}),e=>e.code==='ASSIGNMENT_PENDING');
  opened=false;await assert.rejects(registerRut(db,event,{rut:'123456785',operationId:randomUUID()}),e=>e.code==='EVENT_CLOSED');
