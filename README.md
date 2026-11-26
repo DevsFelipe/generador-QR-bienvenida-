@@ -103,3 +103,7 @@ Los ensayos de integración en `scripts/` requieren MongoDB y crean registros fi
 ## Paseo sin mesas asignadas
 
 La mesa ya no es obligatoria en importación ni alta, y no se muestra en administración ni confirmación pública. Se conservan los valores de eventos anteriores. La asistencia pública requiere una asignación de menú, grupo familiar y niños se mantienen opcionales. No se inventan mesas para cargar planillas.
+
+## Eliminar un invitado
+
+Los administradores disponen de «Eliminar invitado» junto a cada registro. La confirmación identifica nombre y RUT y avisa si tenía asistencia. El servidor exige sesión administradora vigente, CSRF y confirmación; archiva el documento en `deleted_guests` y retira el original en una transacción. Sale del listado y contadores, y se libera el RUT/correo para un nuevo ingreso. La copia interna no aparece en la consulta pública. No hay restauración automática desde el panel.

@@ -12,6 +12,7 @@ import {previewRows,saveGuest} from './imports.js';
 import {guestInput} from './rut.js';
 import {registerRut} from './public-checkin.js';
 import {addGuest} from './add-guest.js';
+import {deleteGuest} from './delete-guest.js';
 
 export const publicRoutes=express.Router(),adminRoutes=express.Router();
 const upload=multer({storage:multer.memoryStorage(),limits:{fileSize:5*1024*1024,files:1}});
@@ -50,6 +51,16 @@ adminRoutes.post('/events/:event/guests',async(req,res)=>{
 adminRoutes.put('/events/:event/guests/:guest',async(req,res)=>{
  let data;try{data=guestInput(req.body);}catch(e){return res.status(400).json({code:'VALIDATION',message:e.message});}
  try{const result=await saveGuest((await store()).db.collection('guests'),objectId(req.params.event),data,{update:true,guestId:objectId(req.params.guest)});res.json({result});}catch(e){if(e.code===11000)throw new ReceptionError('DUPLICATE_GUEST',409);throw e;}
+});
+adminRoutes.delete('/events/:event/guests/:guest',async(req,res)=>{
+ const eventId=objectId(req.params.event),guestId=objectId(req.params.guest),{db,client}=await store(),session=client.startSession();
+ try{
+  const result=await session.withTransaction(async()=>{
+   const user=await db.collection('reception_users').findOne({_id:req.user._id,active:true},{session});
+   return deleteGuest(db,user,eventId,guestId,req.body,session);
+  },{readConcern:{level:'snapshot'},writeConcern:{w:'majority'}});
+  res.json(result);
+ }finally{await session.endSession();}
 });
 adminRoutes.get('/template',async(req,res)=>{
  const book=new ExcelJS.Workbook(),sheet=book.addWorksheet('Invitados');sheet.addRow(['nombre','rut','correo','institucion','menu','Grupo Familiar','N° Niños','nombre colaborador']);sheet.addRow(['Persona de ejemplo','12.345.678-5','','DICTUC','Vegetariano','Familia de ejemplo',0,'Persona de ejemplo']);sheet.columns.forEach(c=>c.width=25);
