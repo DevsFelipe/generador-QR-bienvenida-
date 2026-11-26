@@ -13,6 +13,7 @@ import {guestInput} from './rut.js';
 import {registerRut} from './public-checkin.js';
 import {addGuest} from './add-guest.js';
 import {deleteGuest} from './delete-guest.js';
+import {undoCheckIn} from './undo-checkin.js';
 
 export const publicRoutes=express.Router(),adminRoutes=express.Router();
 const upload=multer({storage:multer.memoryStorage(),limits:{fileSize:5*1024*1024,files:1}});
@@ -58,6 +59,16 @@ adminRoutes.delete('/events/:event/guests/:guest',async(req,res)=>{
   const result=await session.withTransaction(async()=>{
    const user=await db.collection('reception_users').findOne({_id:req.user._id,active:true},{session});
    return deleteGuest(db,user,eventId,guestId,req.body,session);
+  },{readConcern:{level:'snapshot'},writeConcern:{w:'majority'}});
+  res.json(result);
+ }finally{await session.endSession();}
+});
+adminRoutes.delete('/events/:event/guests/:guest/check-in',async(req,res)=>{
+ const eventId=objectId(req.params.event),guestId=objectId(req.params.guest),{db,client}=await store(),session=client.startSession();
+ try{
+  const result=await session.withTransaction(async()=>{
+   const user=await db.collection('reception_users').findOne({_id:req.user._id,active:true},{session});
+   return undoCheckIn(db,user,eventId,guestId,req.body,session);
   },{readConcern:{level:'snapshot'},writeConcern:{w:'majority'}});
   res.json(result);
  }finally{await session.endSession();}

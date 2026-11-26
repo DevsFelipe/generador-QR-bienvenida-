@@ -107,3 +107,7 @@ La mesa ya no es obligatoria en importación ni alta, y no se muestra en adminis
 ## Eliminar un invitado
 
 Los administradores disponen de «Eliminar invitado» junto a cada registro. La confirmación identifica nombre y RUT y avisa si tenía asistencia. El servidor exige sesión administradora vigente, CSRF y confirmación; archiva el documento en `deleted_guests` y retira el original en una transacción. Sale del listado y contadores, y se libera el RUT/correo para un nuevo ingreso. La copia interna no aparece en la consulta pública. No hay restauración automática desde el panel.
+
+## Anular un ingreso
+
+Los administradores pueden usar «Anular ingreso» en un invitado que tenga asistencia registrada. Requiere confirmar nombre, RUT e ingreso actual; un ingreso diferente al mostrado se rechaza para evitar anular una llegada posterior. Conserva la persona y sus datos, deja `checkIn: null`, actualiza contadores al refrescar y registra el ingreso anterior y operador en `checkin_reversals`. Una consulta posterior puede registrar una nueva llegada. No cambia el estado de apertura del evento ni los límites de consultas.
