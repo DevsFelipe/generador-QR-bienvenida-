@@ -74,7 +74,7 @@ adminRoutes.delete('/events/:event/guests/:guest/check-in',async(req,res)=>{
  }finally{await session.endSession();}
 });
 adminRoutes.get('/template',async(req,res)=>{
- const book=new ExcelJS.Workbook(),sheet=book.addWorksheet('Invitados');sheet.addRow(['nombre','rut','correo','institucion','menu','Grupo Familiar','N° Niños','nombre colaborador']);sheet.addRow(['Persona de ejemplo','12.345.678-5','','DICTUC','Vegetariano','Familia de ejemplo',0,'Persona de ejemplo']);sheet.columns.forEach(c=>c.width=25);
+ const book=new ExcelJS.Workbook(),sheet=book.addWorksheet('Invitados');sheet.addRow(['nombre','rut','correo','institucion','menu','Grupo Familiar','Número de niños y niñas','nombre colaborador']);sheet.addRow(['Persona de ejemplo','12.345.678-5','','DICTUC','Vegetariano','Familia de ejemplo',0,'Persona de ejemplo']);sheet.columns.forEach(c=>c.width=25);
  res.attachment('plantilla-invitados.xlsx').send(Buffer.from(await book.xlsx.writeBuffer()));
 });
 adminRoutes.post('/excel',upload.single('file'),async(req,res)=>{
