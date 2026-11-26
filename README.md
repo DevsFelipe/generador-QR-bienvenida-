@@ -18,7 +18,7 @@ El repositorio de despliegue contiene únicamente el paquete generado.
 
 ## Paseo familiar DICTUC · 28 de noviembre de 2026
 
-La plantilla incluye **Grupo Familiar**, **N° Niños** y **nombre colaborador**. Son columnas opcionales y se pueden asociar manualmente durante la carga. N° Niños acepta enteros no negativos; cero se conserva y un campo vacío significa sin informar. El alta manual, la edición y el listado administrativo incluyen los mismos datos. Las columnas de nombre, RUT, mesa y menú siguen siendo obligatorias.
+La plantilla incluye **Grupo Familiar**, **N° Niños** y **nombre colaborador**. Son columnas opcionales y se pueden asociar manualmente durante la carga. N° Niños acepta enteros no negativos; cero se conserva y un campo vacío significa sin informar. El alta manual, la edición y el listado administrativo incluyen los mismos datos. Las columnas de nombre, RUT y menú siguen siendo obligatorias.
 
 En la administración, **Preparar nuevo paseo familiar** completa un formulario nuevo con nombre Paseo Final de Año - Dictuc 2026, fecha sábado 28/11/2026 y lugar Centro de Eventos Los Aromos. Guardarlo crea un evento distinto; no reemplaza eventos anteriores. El sitio del recinto es https://eventoslosaromos.cl/.
 
@@ -46,7 +46,7 @@ npm.cmd start
 
 La contraseña aleatoria se guarda localmente en `reception/acceso-mi_admin.txt`, excluido de Git. Guárdala de forma segura. No ejecutes el alta para un usuario que ya existe: las cuentas y contraseñas residen en MongoDB y se conservan al actualizar código.
 
-Abre http://127.0.0.1:3220. Crea un evento, carga una planilla con encabezados `nombre | rut | mesa | menu` (correo e institución opcionales), revisa y confirma los datos. Abre la recepción para probar una llegada con datos ficticios. El RUT admite puntos y guion o su formato compacto; se valida el dígito verificador.
+Abre http://127.0.0.1:3220. Crea un evento, carga una planilla con encabezados `nombre | rut | menu` (correo e institución opcionales), revisa y confirma los datos. Abre la recepción para probar una llegada con datos ficticios. El RUT admite puntos y guion o su formato compacto; se valida el dígito verificador.
 
 La guía se encuentra en http://127.0.0.1:3220/guia-despliegue.html y la página del proyecto en http://127.0.0.1:3220/proyecto.html.
 
@@ -99,3 +99,7 @@ npm.cmd test
 - `src/` y `public/`: organizador anterior conservado como referencia; no es el punto de inicio actual ni se exporta a Render.
 
 Los ensayos de integración en `scripts/` requieren MongoDB y crean registros ficticios; léelos antes de ejecutarlos. Las pruebas locales no sustituyen un ensayo en Render y en teléfonos reales. Para una base antigua revisa `reception/migrate.js`, que genera respaldos privados antes de modificar índices; no es necesario ejecutarlo para cada cambio visual.
+
+## Paseo sin mesas asignadas
+
+La mesa ya no es obligatoria en importación ni alta, y no se muestra en administración ni confirmación pública. Se conservan los valores de eventos anteriores. La asistencia pública requiere una asignación de menú, grupo familiar y niños se mantienen opcionales. No se inventan mesas para cargar planillas.

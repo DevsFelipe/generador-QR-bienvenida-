@@ -31,3 +31,9 @@ test('confirmación pública expone familia y cero niños sin revelar correo ni 
  const repeat=await registerRut(db,event,{rut:base.rut,operationId:randomUUID()});assert.equal(repeat.code,'ALREADY_CHECKED_IN');assert.equal(repeat.guest.numeroNinos,0);assert.equal(repeat.guest.at,first.guest.at);
  delete guest.grupoFamiliar;delete guest.numeroNinos;const legacy=await registerRut(db,event,{rut:base.rut,operationId:randomUUID()});assert.equal(legacy.guest.grupoFamiliar,null);assert.equal(legacy.guest.numeroNinos,null);
 });
+
+
+test('paseo sin mesa admite importación y alta sin inventar asignaciones',()=>{
+ const {mesa,...input}=base;const data=guestInput(input);assert.equal(Object.hasOwn(data,'mesa'),false);
+ const sheet={rows:[{number:1,cells:['Nombre','RUT','Menú']},{number:2,cells:[input.nombre,input.rut,input.menu]}]};const [row]=previewRows(sheet,0,{nombre:0,rut:1,menu:2});assert.deepEqual(row.errors,[]);assert.equal(Object.hasOwn(row.data,'mesa'),false);
+});

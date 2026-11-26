@@ -10,7 +10,8 @@ export function normalizeRut(value){
 }
 export function guestInput(input){
  const data={rut:normalizeRut(input.rut)};
- for(const key of ['nombre','mesa','menu']){if(typeof input[key]!=='string'||!input[key].trim()||input[key].length>(key==='menu'?500:200))throw new Error('Completa nombre, mesa y menú con un largo válido.');data[key]=input[key].trim();}
+ for(const key of ['nombre','menu']){if(typeof input[key]!=='string'||!input[key].trim()||input[key].length>(key==='menu'?500:200))throw new Error('Completa nombre y menú con un largo válido.');data[key]=input[key].trim();}
+ if(Object.hasOwn(input,'mesa')){if(typeof input.mesa!=='string'||input.mesa.length>200)throw new Error('Mesa inválida.');data.mesa=input.mesa.trim();}
  data.institucion=String(input.institucion??'').trim();data.correo=String(input.correo??'').trim();
  if(data.institucion.length>300||data.correo.length>254||(data.correo&&!/^[^\s@<>;,]+@[^\s@<>;,]+\.[^\s@<>;,]+$/.test(data.correo)))throw new Error('Correo o institución inválidos.');
  for(const key of ['grupoFamiliar','nombreColaborador']){

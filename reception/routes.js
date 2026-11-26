@@ -52,7 +52,7 @@ adminRoutes.put('/events/:event/guests/:guest',async(req,res)=>{
  try{const result=await saveGuest((await store()).db.collection('guests'),objectId(req.params.event),data,{update:true,guestId:objectId(req.params.guest)});res.json({result});}catch(e){if(e.code===11000)throw new ReceptionError('DUPLICATE_GUEST',409);throw e;}
 });
 adminRoutes.get('/template',async(req,res)=>{
- const book=new ExcelJS.Workbook(),sheet=book.addWorksheet('Invitados');sheet.addRow(['nombre','rut','correo','institucion','mesa','menu','Grupo Familiar','N° Niños','nombre colaborador']);sheet.addRow(['Persona de ejemplo','12.345.678-5','','DICTUC','12','Vegetariano','Familia de ejemplo',0,'Persona de ejemplo']);sheet.columns.forEach(c=>c.width=25);
+ const book=new ExcelJS.Workbook(),sheet=book.addWorksheet('Invitados');sheet.addRow(['nombre','rut','correo','institucion','menu','Grupo Familiar','N° Niños','nombre colaborador']);sheet.addRow(['Persona de ejemplo','12.345.678-5','','DICTUC','Vegetariano','Familia de ejemplo',0,'Persona de ejemplo']);sheet.columns.forEach(c=>c.width=25);
  res.attachment('plantilla-invitados.xlsx').send(Buffer.from(await book.xlsx.writeBuffer()));
 });
 adminRoutes.post('/excel',upload.single('file'),async(req,res)=>{
