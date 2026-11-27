@@ -6,7 +6,7 @@ const base={nombre:'Invitada ficticia',rut:'12345678-5',mesa:'1',menu:'Tradicion
 test('familia admite cero niños, normaliza texto y rechaza cantidades inválidas',()=>{
  const g=guestInput({...base,grupoFamiliar:' Familia Uno ',numeroNinos:'0',nombreColaborador:' Colaborador Uno '});assert.equal(g.numeroNinos,0);assert.equal(g.grupoFamiliar,'Familia Uno');assert.equal(g.nombreColaborador,'Colaborador Uno');
  assert.equal(guestInput({...base,numeroNinos:'2'}).numeroNinos,2);
- for(const value of ['-1','1.5','abc',true,{},'9007199254740992'])assert.throws(()=>guestInput({...base,numeroNinos:value}),/Niños/);
+ for(const value of ['-1','1.5','abc',true,{},'9007199254740992'])assert.throws(()=>guestInput({...base,numeroNinos:value}),/niños/iu);
  assert.equal(guestInput(base).numeroNinos,undefined);assert.equal(guestInput({...base,numeroNinos:''}).numeroNinos,null);
 });
 test('importación familiar conserva valores y detecta columnas reutilizadas',()=>{

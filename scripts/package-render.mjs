@@ -8,7 +8,7 @@ const exists=async file=>fs.access(file).then(()=>true,()=>false);
 const nested=await exists(path.join(repository,'.git'))&&await exists(path.join(repository,'recepcion-render','package.json'));
 const target=nested?path.join(repository,'recepcion-render'):repository;
 let crlf=false;try{crlf=execFileSync('git',['-C',repository,'config','--get','core.autocrlf'],{encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim()==='true';}catch{}
-const files=['package.json','package-lock.json','render.yaml','.dockerignore','reception/Dockerfile',...(await fs.readdir('reception')).filter(n=>n.endsWith('.js')&&n!=='migrate.js').map(n=>'reception/'+n),...['admin.html','admin.js','guest.html','guest.js','guest.css','style.css','project.css','proyecto.html','guia-despliegue.html'].map(n=>'reception/public/'+n)];
+const files=['package.json','package-lock.json','render.yaml','.dockerignore','reception/Dockerfile',...(await fs.readdir('reception')).filter(n=>n.endsWith('.js')&&n!=='migrate.js').map(n=>'reception/'+n),...['admin.html','admin.js','guest.html','guest.js','guest.css','transport.html','transport.js','style.css','project.css','proyecto.html','guia-despliegue.html'].map(n=>'reception/public/'+n)];
 await fs.mkdir(target,{recursive:true});
 for(const file of files){const destination=path.join(target,file);await fs.mkdir(path.dirname(destination),{recursive:true});const content=await fs.readFile(path.join(root,file),'utf8');await fs.writeFile(destination,crlf?content.replace(/\r?\n/g,'\r\n'):content);}
 for(const obsolete of ['reception/public/index.html','reception/public/app.js'])await fs.unlink(path.join(target,obsolete)).catch(e=>{if(e.code!=='ENOENT')throw e;});

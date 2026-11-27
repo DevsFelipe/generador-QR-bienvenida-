@@ -6,5 +6,6 @@ export async function guestIndexes(db,{removeLegacy=false}={}){
  await guests.createIndex({eventId:1,creationOperationId:1},{name:'event_manual_creation_unique',unique:true,partialFilterExpression:{creationOperationId:{$type:'string'}}});
  if(removeLegacy){const old=(await guests.listIndexes().toArray()).find(i=>i.name==='eventId_1_correoNormalizado_1'&&i.unique&&!i.partialFilterExpression);if(old)await guests.dropIndex(old.name);}
  await db.collection('events').createIndex({publicSlug:1},{unique:true,partialFilterExpression:{publicSlug:{$type:'string'}}});
+ await db.collection('events').createIndex({transportSlug:1},{unique:true,partialFilterExpression:{transportSlug:{$type:'string'}}});
  await db.collection('public_limits').createIndex({expiresAt:1},{expireAfterSeconds:0});
 }

@@ -5,3 +5,5 @@
 header{border-bottom:3px solid #b99a5c}.step{color:#8c7446}.stats b{color:#123b68}button:hover{background:#0b2d51}.subtle:hover,.file-button:hover{background:#dfe8f2;color:#123b68}a:focus-visible,summary:focus-visible{outline:2px solid #b99a5c;outline-offset:3px}input[type=checkbox]{accent-color:#123b68}
 
 button.danger{background:#fff0ed;color:#943e30;border:1px solid #dcb6ad}button.danger:hover{background:#f7ded7}
+
+#transport-qr{max-width:100%;height:auto;display:block;margin:20px auto}#transport-link{overflow-wrap:anywhere}

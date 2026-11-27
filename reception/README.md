@@ -100,6 +100,19 @@ Colecciones adicionales: `reception_users` y `reception_sessions` (hash del toke
 
 Verificado localmente el 26/10/2026: 16 pruebas automatizadas aprobadas; ensayo real HTTP/Atlas con usuarios y datos ficticios, ingreso QR/manual y cinco peticiones simultáneas con una única asistencia. Los datos de ese ensayo fueron retirados. Se comprobó en navegador el inicio de sesión del administrador y la visualización del evento y del invitado existente, sin registrar su asistencia. La cuenta `recepcion_admin` se creó con autorización expresa del organizador. Sus credenciales están en el archivo local indicado arriba; no se muestran en logs ni documentación.
 
-Pendiente de validación en despliegue: cámara en teléfonos reales iOS/Android, permisos reales de cámara, HTTPS del hosting y ensayo de carga previsto para el evento. No se ha implementado recepción offline, reingreso, acompañantes, reversión de asistencia ni exportación de reportes en esta etapa. No publicar el servidor organizador local del puerto 3210.
+Pendiente de validación en despliegue: cámara en teléfonos reales iOS/Android, permisos reales de cámara, HTTPS del hosting y ensayo de carga previsto para el evento. No se ha implementado recepción offline ni un historial de múltiples viajes de ida y vuelta. La aplicación registra un viaje por trabajador y evento, separado de su llegada al recinto. No publicar el servidor organizador local del puerto 3210.
 
 Referencias: [jsQR](https://github.com/cozmo/jsQR), [operaciones atómicas del driver MongoDB](https://www.mongodb.com/docs/drivers/node/current/crud/compound-operations/).
+
+
+## Transporte de trabajadores (noviembre de 2026)
+
+- El QR habitual `/e/:slug` registra la llegada al recinto. El QR de transporte `/t/:slug` registra un viaje en bus. Ambos tienen direcciones persistentes por evento; solicitar o descargar el QR nuevamente no los cambia.
+- Administración → Transporte de trabajadores: mostrar/descargar QR, abrir o cerrar el transporte, cargar nómina prevista y descargar Excel de asistencia y transporte. El transporte se abre por separado de la recepción.
+- En el bus se ingresa el RUT del trabajador y el **total del grupo familiar que viaja**, incluyendo al trabajador. Los botones + y − parten en 1. Se admiten de 1 a 51 personas. El servidor guarda acompañantes = total − 1. No requiere inscripción previa en bus, pero sí estar activo en la nómina del evento.
+- La nómina prevista tiene encabezados en la primera fila: `Nombre Completo`, `RUT` y `Cuantas Personas en Bus`. El último campo incluye al trabajador. Se selecciona la hoja y se revisa un cruce por RUT normalizado; errores, duplicados y personas ausentes deben corregirse o excluirse explícitamente. Guardar modifica únicamente `transportPlan`, nunca nombres, grupos familiares, menús, asistencias ni viajes. Un nombre distinto en planilla no reemplaza el nombre del trabajador del evento.
+- `guests.transportCheckIn` guarda fecha, acompañantes reales, identificador de operación y total previsto al registrar. Una actualización condicional por trabajador evita duplicados y conserva el primer registro ante reintentos. El administrador puede anular un viaje erróneo sin afectar la llegada; la copia anterior queda en `transport_reversals` mediante transacción.
+- La exportación autenticada incluye llegada al evento, planificación del bus, viaje registrado, acompañantes previstos/reales, total de viajeros y diferencia. «Sin registro» no demuestra que la persona no usara el transporte. No se deducen cantidades contando nombres del texto del grupo familiar.
+- Las rutas de transporte públicas conservan validación de RUT y límites de consultas. No exponen la nómina, correos ni RUT en la respuesta de confirmación. Las operaciones administrativas requieren sesión, rol administrador y CSRF.
+
+Verificación local: pruebas automatizadas de transporte, idempotencia, límites, aislamiento por evento, QR estable, cruce de nómina, exportación y anulación; interfaz probada con datos ficticios sin registrar viajes de personas reales.

@@ -26,6 +26,7 @@ app.get('/index.html',(req,res)=>res.redirect('/'));
 app.get('/vendor/jsqr.js',(req,res)=>res.sendFile(fileURLToPath(new URL('../node_modules/jsqr/dist/jsQR.js',import.meta.url))));
 app.use(express.static(fileURLToPath(new URL('./public',import.meta.url))));
 app.get('/e/:slug',(req,res)=>res.sendFile(fileURLToPath(new URL('./public/guest.html',import.meta.url))));
+app.get('/t/:slug',(req,res)=>res.sendFile(fileURLToPath(new URL('./public/transport.html',import.meta.url))));
 app.use('/api/public',publicRoutes);
 app.post('/api/login',async(req,res)=>{
  const key=req.ip,now=Date.now();
@@ -58,7 +59,7 @@ app.post('/api/logout',async(req,res)=>{await(await store()).db.collection('rece
 app.use('/api/admin',adminRoutes);
 app.get('/api/events',async(req,res)=>{
  const query=req.user.role==='admin'?{}:{_id:{$in:req.user.eventIds||[]}};
- res.json(await(await store()).db.collection('events').find(query).project({nombre:1,fecha:1,lugar:1,estado:1,timezone:1}).sort({createdAt:-1}).toArray());
+ res.json(await(await store()).db.collection('events').find(query).project({nombre:1,fecha:1,lugar:1,estado:1,timezone:1,transportOpen:1}).sort({createdAt:-1}).toArray());
 });
 async function eventAccess(req){const id=objectId(req.params.event);if(!mayAccess(req.user,id))throw new ReceptionError('FORBIDDEN',403);return id;}
 app.post('/api/events/:event/state',async(req,res)=>{

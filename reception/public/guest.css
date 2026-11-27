@@ -3,3 +3,5 @@
 footer p{display:flex;align-items:center;justify-content:center;gap:8px}.linkedin-link{display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:36px;border:0;padding:0}.linkedin-link:hover{color:#0a66c2}
 
 .family-assignment strong{display:block;font-size:19px;line-height:1.4;font-weight:500;margin:8px 0 0;overflow-wrap:anywhere}
+
+.quantity-control{display:grid;grid-template-columns:48px 1fr 48px;gap:12px;align-items:center;margin:12px 0}.quantity-control button{justify-content:center;padding:10px;font-size:24px;min-height:52px}.quantity-control input{text-align:center;font-size:22px}.quantity-control button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}

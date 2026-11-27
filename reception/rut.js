@@ -20,7 +20,7 @@ export function guestInput(input){
  if(Object.hasOwn(input,'numeroNinos')){
   const value=input.numeroNinos;
   if(value===''||value===null||value===undefined)data.numeroNinos=null;
-  else {if(!['string','number'].includes(typeof value)||!/^\d+$/.test(String(value).trim())||!Number.isSafeInteger(Number(value))||Number(value)<0)throw new Error('N° Niños debe ser un número entero igual o mayor que cero.');data.numeroNinos=Number(value);}
+  else {if(!['string','number'].includes(typeof value)||!/^\d+$/.test(String(value).trim())||!Number.isSafeInteger(Number(value))||Number(value)<0)throw new Error('Número de niños y niñas debe ser un entero igual o mayor que cero.');data.numeroNinos=Number(value);}
  }
  if(data.correo)data.correoNormalizado=data.correo.toLowerCase();
  return data;

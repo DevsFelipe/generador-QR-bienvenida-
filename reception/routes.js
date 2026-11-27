@@ -14,6 +14,8 @@ import {registerRut} from './public-checkin.js';
 import {addGuest} from './add-guest.js';
 import {deleteGuest} from './delete-guest.js';
 import {undoCheckIn} from './undo-checkin.js';
+import {transportEvent,registerTransport,previewTransport,undoTransport} from './transport.js';
+import {attendanceWorkbook} from './attendance-export.js';
 
 export const publicRoutes=express.Router(),adminRoutes=express.Router();
 const upload=multer({storage:multer.memoryStorage(),limits:{fileSize:5*1024*1024,files:1}});
@@ -21,6 +23,14 @@ const previews=new Map();
 function eventFields(body){const out={};for(const key of ['nombre','fecha','lugar']){if(typeof body[key]!=='string'||!body[key].trim()||body[key].length>300)throw new ReceptionError('INVALID_EVENT');out[key]=body[key].trim();}return{...out,timezone:'America/Santiago'};}
 async function eventPublic(slug,db){if(!/^[a-f0-9]{32}$/.test(slug))throw new ReceptionError('NOT_FOUND',404);const e=await db.collection('events').findOne({publicSlug:slug});if(!e)throw new ReceptionError('NOT_FOUND',404);return e;}
 async function consume(db,key,maximum,window){const bucket=Math.floor(Date.now()/window);const result=await db.collection('public_limits').findOneAndUpdate({_id:digest(key+':'+bucket)},{$inc:{count:1},$setOnInsert:{expiresAt:new Date((bucket+2)*window)}},{upsert:true,returnDocument:'after'});if(result.count>maximum)throw new ReceptionError('PUBLIC_RATE_LIMIT',429);}
+async function busPublic(slug,db){if(!/^[a-f0-9]{32}$/.test(slug))throw new ReceptionError('NOT_FOUND',404);const event=await db.collection('events').findOne({transportSlug:slug});if(!event)throw new ReceptionError('NOT_FOUND',404);return event;}
+publicRoutes.get('/transport/:slug',async(req,res)=>{const {db}=await store(),e=await busPublic(req.params.slug,db);res.json({nombre:e.nombre,fecha:e.fecha,lugar:e.lugar,open:e.transportOpen===true});});
+publicRoutes.post('/transport/:slug/check-in',async(req,res)=>{
+ const {db}=await store();await consume(db,'ip:'+req.ip,300,60000);
+ if(typeof req.body.rut!=='string'||req.body.rut.length>30)throw new ReceptionError('INVALID_RUT');
+ await consume(db,'bus-rut:'+req.ip+':'+req.params.slug+':'+req.body.rut.replace(/[.\s-]/g,'').toUpperCase(),8,600000);
+ res.json(await registerTransport(db,await busPublic(req.params.slug,db),req.body));
+});
 publicRoutes.get('/:slug',async(req,res)=>{const {db}=await store();const e=await eventPublic(req.params.slug,db);res.json({nombre:e.nombre,fecha:e.fecha,lugar:e.lugar,open:e.estado==='recepcion_abierta'});});
 publicRoutes.post('/:slug/check-in',async(req,res)=>{
  const {db}=await store();await consume(db,'ip:'+req.ip,300,60000);
@@ -35,7 +45,7 @@ adminRoutes.use((req,res,next)=>{if(req.user.role!=='admin')throw new ReceptionE
 adminRoutes.post('/events',async(req,res)=>{const data={...eventFields(req.body),estado:'borrador',createdAt:new Date()};const result=await(await store()).db.collection('events').insertOne(data);res.json({...data,_id:result.insertedId});});
 adminRoutes.put('/events/:event',async(req,res)=>{const result=await(await store()).db.collection('events').updateOne({_id:objectId(req.params.event)},{$set:eventFields(req.body)});if(!result.matchedCount)throw new ReceptionError('NOT_FOUND',404);res.json({ok:true});});
 adminRoutes.get('/events/:event/guests',async(req,res)=>{
- const eventId=objectId(req.params.event);res.json(await(await store()).db.collection('guests').find({eventId}).project({nombre:1,rut:1,correo:1,institucion:1,mesa:1,menu:1,grupoFamiliar:1,numeroNinos:1,nombreColaborador:1,activo:1,checkIn:1}).sort({nombre:1}).limit(5000).toArray());
+ const eventId=objectId(req.params.event);res.json(await(await store()).db.collection('guests').find({eventId}).project({nombre:1,rut:1,correo:1,institucion:1,mesa:1,menu:1,grupoFamiliar:1,numeroNinos:1,nombreColaborador:1,activo:1,checkIn:1,transportPlan:1,transportCheckIn:1}).sort({nombre:1}).limit(5000).toArray());
 });
 adminRoutes.post('/events/:event/guests',async(req,res)=>{
  try{guestInput(req.body);}catch(e){return res.status(400).json({code:'VALIDATION',message:e.message});}
@@ -96,4 +106,33 @@ adminRoutes.post('/events/:event/public-qr',async(req,res)=>{
  await db.collection('events').updateOne({_id:eventId,publicSlug:{$exists:false}},{$set:{publicSlug:randomBytes(16).toString('hex')}});
  const event=await db.collection('events').findOne({_id:eventId});if(!event)throw new ReceptionError('NOT_FOUND',404);
  const url=config.origin+'/e/'+event.publicSlug;res.json({url,png:await QRCode.toDataURL(url,{width:600,margin:4,errorCorrectionLevel:'M'})});
+});
+adminRoutes.post('/events/:event/transport-qr',async(req,res)=>{
+ const {db}=await store(),event=await transportEvent(db,objectId(req.params.event)),url=config.origin+'/t/'+event.transportSlug;
+ res.json({url,open:event.transportOpen===true,png:await QRCode.toDataURL(url,{width:600,margin:4,errorCorrectionLevel:'M'})});
+});
+adminRoutes.post('/events/:event/transport-state',async(req,res)=>{
+ if(typeof req.body.open!=='boolean')throw new ReceptionError('INVALID_STATE');
+ const result=await(await store()).db.collection('events').updateOne({_id:objectId(req.params.event)},{$set:{transportOpen:req.body.open},$push:{transportAudit:{open:req.body.open,by:req.user._id,at:new Date()}}});
+ if(!result.matchedCount)throw new ReceptionError('NOT_FOUND',404);res.json({ok:true});
+});
+adminRoutes.delete('/events/:event/guests/:guest/transport',async(req,res)=>{
+ const eventId=objectId(req.params.event),guestId=objectId(req.params.guest),{db,client}=await store(),session=client.startSession();
+ try{res.json(await session.withTransaction(async()=>{
+  const user=await db.collection('reception_users').findOne({_id:req.user._id,active:true},{session});return undoTransport(db,user,eventId,guestId,req.body,session);
+ },{readConcern:{level:'snapshot'},writeConcern:{w:'majority'}}));}finally{await session.endSession();}
+});
+function busSheet(req){const item=previews.get(req.body.previewId);if(!item||item.expires<Date.now()||item.user!==String(req.user._id))throw new ReceptionError('PREVIEW_EXPIRED');const sheet=item.sheets[Number(req.body.sheet)];if(!sheet)throw new ReceptionError('INVALID_SHEET');return sheet;}
+adminRoutes.post('/events/:event/transport-import-preview',async(req,res)=>{res.json(await previewTransport((await store()).db,objectId(req.params.event),busSheet(req)));});
+adminRoutes.post('/events/:event/transport-import',async(req,res)=>{
+ const eventId=objectId(req.params.event),{db}=await store();if(!await db.collection('events').findOne({_id:eventId}))throw new ReceptionError('NOT_FOUND',404);
+ const rows=await previewTransport(db,eventId,busSheet(req));if(rows.some(r=>r.errors.length)&&req.body.excludeInvalid!==true)throw new ReceptionError('INVALID_ROWS');
+ let updated=0;for(const row of rows.filter(r=>!r.errors.length)){
+  const result=await db.collection('guests').updateOne({_id:row.workerId,eventId,rut:row.data.rut,activo:true},{$set:{transportPlan:{total:row.data.total,updatedAt:new Date(),by:req.user._id}}});updated+=result.matchedCount;
+ }
+ await db.collection('imports').insertOne({eventId,type:'transport',operator:req.user._id,createdAt:new Date(),updated,rejected:rows.length-updated});res.json({updated,rejected:rows.length-updated});
+});
+adminRoutes.get('/events/:event/attendance.xlsx',async(req,res)=>{
+ const eventId=objectId(req.params.event),{db}=await store(),event=await db.collection('events').findOne({_id:eventId});if(!event)throw new ReceptionError('NOT_FOUND',404);
+ const guests=await db.collection('guests').find({eventId,activo:true}).sort({nombre:1}).toArray();res.attachment('asistencia-y-transporte.xlsx').send(await attendanceWorkbook(event,guests));
 });
